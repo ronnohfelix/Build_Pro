@@ -404,9 +404,20 @@ class Customer(models.Model):
         # Return a generic string if no other information is available
         return 'Unnamed Customer'
 
+class Category(models.Model):
+    name = models.CharField(max_length=200)
+    
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = 'categories'
+
+
     
 class Product(models.Model):
     name = models.CharField(max_length=200, null=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, default=1) # new
     description = RichTextField(null=True, blank=True) # new
     price = models.DecimalField(max_digits=8, decimal_places=0) # new
     digital = models.BooleanField(default=False, null=True, blank=False) # new
@@ -469,8 +480,8 @@ class OrderItem(models.Model):
 
     @property
     def get_total(self):
-        # Handle case where product is None
-        if self.product is None:
+        # Handle case where product or order is None
+        if self.product is None or self.order is None:
             return 0
         
         # Calculate total
@@ -483,17 +494,23 @@ class OrderItem(models.Model):
             return 'Deleted'
         return self.product.name
 
+    @property
+    def order_customer(self):
+        if self.order is None or self.order.customer is None:
+            return 'Unknown'
+        return self.order.customer.name  # or whatever attribute you want to display
+
 class ShippingAddress(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, blank=True, null=True) # new
-    order = models.ForeignKey(Order, on_delete=models.SET_NULL, blank=True, null=True) # new
+    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, blank=True, null=True)
+    full_name = models.CharField(max_length=200, null=True)
     address = models.CharField(max_length=200, null=True)
     city = models.CharField(max_length=200, null=True)
     state = models.CharField(max_length=200, null=True)
     zipcode = models.CharField(max_length=200, null=True)
-    date_added = models.DateTimeField(auto_now_add=True)
+    country = models.CharField(max_length=200, null=True)
+
+    class Meta:
+        verbose_name_plural = 'Shipping Addresses'
 
     def __str__(self):
-        if self.address:
-            return self.address
-        else:
-            return f"ShippingAddress #{self.id} (No address provided)"
+        return f"{self.full_name}'s Shipping Address"  # updated to reflect full_name

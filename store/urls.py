@@ -19,4 +19,8 @@ urlpatterns = [
     path('reset_password_complete/', auth_views.PasswordResetCompleteView.as_view(template_name="store/password_reset_done.html"), name="password_reset_complete"),
     path('store/', views.store, name='store'),
     path('search/', views.search_view, name='search'),
+    path('category/<str:cat>', views.category, name='category'),
+    path('shipping/', views.shipping_info, name='shipping'),
+    path('place_order/', views.place_order, name='place_order'),
+    path('order_summary/<int:order_id>/', views.order_summary, name='order_summary'),
 ]
